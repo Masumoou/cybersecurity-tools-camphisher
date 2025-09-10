@@ -2,10 +2,12 @@
 <html>
 <head>
     <title>Welcome - Cybersecurity Tools</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <h1>Welcome to Your Phishing Simulation Tool!</h1>
-    <a href="{{ url_for('login') }}">Go to Login Page</a>
+    <a href="{{ url_for('login') }}">Go to Login Page</a><br>
+    <a href="{{ url_for('camera') }}">Go to Camera Page</a>
 </body>
 </html>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+

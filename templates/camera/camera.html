@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Access</title>
+</head>
+<body>
+    <h1>Camera Access</h1>
+    <video id="video" width="600" height="400" autoplay></video>
+    <br>
+    <button id="capture">Capture Image</button>
+    <br>
+    <canvas id="canvas" width="600" height="400" style="display:none;"></canvas>
+    <br>
+    <img id="capturedImage" width="600" height="400" style="display:none;">
+
+    <script>
+        // Access the user's camera
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('capture');
+        const capturedImage = document.getElementById('capturedImage');
+
+        // Request camera access
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.log('Error accessing the camera: ', err);
+            });
+
+        // Capture image from video stream when the button is clicked
+        captureButton.addEventListener('click', () => {
+            // Draw the current frame from the video to the canvas
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the canvas image to base64
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            // Display the captured image on the page
+            capturedImage.src = dataUrl;
+            capturedImage.style.display = 'block';
+
+            // Send the captured image data to Flask server for saving
+            fetch('/capture_camera', {
+                method: 'POST',
+                body: new URLSearchParams({ imageData: dataUrl })
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Server response:', data);
+            })
+            .catch(err => {
+                console.error('Error sending data to server:', err);
+            });
+        });
+    </script>
+</body>
+</html>
+

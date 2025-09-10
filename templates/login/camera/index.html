@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Camera Capture</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Camera Access Test</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <br>
+    <button id="snap">Take Snapshot</button>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <form id="uploadForm" method="POST" action="{{ url_for('capture_camera') }}">
+        <input type="hidden" name="imageData" id="imageData">
+        <input type="submit" value="Upload Snapshot">
+    </form>
+
+    <script>
+        const video = document.getElementById('video');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => video.srcObject = stream)
+            .catch(err => alert("Error accessing camera: " + err));
+
+        const canvas = document.getElementById('canvas');
+        const snapButton = document.getElementById('snap');
+
+        snapButton.addEventListener('click', () => {
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/png');
+            document.getElementById('imageData').value = dataURL;
+            alert("Snapshot ready! Press 'Upload Snapshot' to send to server.");
+        });
+    </script>
+</body>
+</html>
+
